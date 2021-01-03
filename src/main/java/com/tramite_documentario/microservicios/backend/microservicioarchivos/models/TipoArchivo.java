@@ -7,12 +7,10 @@ import javax.persistence.*;
 public class TipoArchivo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_tipo_archivo")
     private Long id;
 
     private String nombre;
-
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "tipoArchivo")
-    private Archivo archivo;
 
     public Long getId() {
         return id;

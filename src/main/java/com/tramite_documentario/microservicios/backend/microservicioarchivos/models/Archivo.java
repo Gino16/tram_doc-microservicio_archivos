@@ -1,21 +1,24 @@
 package com.tramite_documentario.microservicios.backend.microservicioarchivos.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "archivos")
 public class Archivo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_archivo")
     private Long id;
+
+    @NotEmpty
     private String descripcion;
     private String url;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_archivo")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @NotNull
     private TipoArchivo tipoArchivo;
 
     public Long getId() {
