@@ -1,14 +1,16 @@
 package com.tramite_documentario.microservicios.backend.microservicioarchivos.controllers;
 
 import com.tramite_documentario.microservicio.backend.commonmicroservicios.controllers.CommonController;
-import com.tramite_documentario.microservicio.backend.commonmicroservicios.services.CommonService;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Archivo;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Solicitud;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.clients.SolicitudFeignClient;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.ArchivoService;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.TipoArchivoServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -109,5 +111,18 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
     @PostMapping("/guardar-todos")
     public ResponseEntity<?> guardarTodo(@RequestBody List<Archivo> archivos){
         return ResponseEntity.status(HttpStatus.CREATED).body(this.service.saveAll(archivos));
+    }
+
+    @GetMapping("/ver-archivo/{id}")
+    public ResponseEntity<?> verArchivo(@PathVariable Long id){
+        Optional<Archivo> a = service.findById(id);
+
+        if (a.isEmpty() || a.get().getFile() == null){
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource documento = new ByteArrayResource(a.get().getFile());
+
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documento);
     }
 }
