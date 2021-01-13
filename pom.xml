@@ -22,6 +22,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.tramite_documentario.microservicios.backend</groupId>
+            <artifactId>common-archivos</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.tramite_documentario.microservicio.backend</groupId>
             <artifactId>common-microservicios</artifactId>
             <version>0.0.1-SNAPSHOT</version>
@@ -55,6 +61,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
     </dependencies>
 
