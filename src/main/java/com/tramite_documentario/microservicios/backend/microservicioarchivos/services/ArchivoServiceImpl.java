@@ -18,4 +18,9 @@ public class ArchivoServiceImpl extends CommonServiceImpl<Archivo, ArchivoReposi
     public List<Archivo> saveAll(List<Archivo> archivos) {
         return (List<Archivo>) this.repository.saveAll(archivos);
     }
+
+    @Override
+    public List<Archivo> findAllByIdSolicitud(Long id) {
+        return this.repository.findAllByIdSolicitud(id);
+    }
 }

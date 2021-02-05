@@ -10,4 +10,6 @@ public interface ArchivoService extends CommonService<Archivo> {
     public List<Archivo> findAllByIdSolicitudIsNull();
 
     public List<Archivo> saveAll(List<Archivo> archivos);
+
+    public List<Archivo> findAllByIdSolicitud(Long id);
 }

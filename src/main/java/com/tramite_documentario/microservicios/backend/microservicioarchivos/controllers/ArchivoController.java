@@ -102,6 +102,13 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
         return ResponseEntity.ok().body(tipoArchivoService.findAll());
     }
 
+    @GetMapping("/solicitud/{id}")
+    public ResponseEntity<?> listarArchivosBySolicitud(@PathVariable Long id){
+
+        List<Archivo> archivos = this.service.findAllByIdSolicitud(id);
+
+        return archivos != null ? ResponseEntity.ok(archivos) : ResponseEntity.notFound().build();
+    }
 
     @GetMapping("/archivos-sin-solicitud")
     public ResponseEntity<?> listarArchivosSinSolicitud(){
