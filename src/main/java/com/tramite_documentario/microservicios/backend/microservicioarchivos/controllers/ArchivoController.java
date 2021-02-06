@@ -1,22 +1,31 @@
 package com.tramite_documentario.microservicios.backend.microservicioarchivos.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tramite_documentario.microservicio.backend.commonmicroservicios.controllers.CommonController;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Archivo;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Solicitud;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.clients.SolicitudFeignClient;
+import com.tramite_documentario.microservicios.backend.microservicioarchivos.models.entity.Correos;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.ArchivoService;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.TipoArchivoServiceImpl;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.validation.Valid;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +38,9 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
 
     @Autowired
     private SolicitudFeignClient solicitudFeignClient;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @PostMapping("/crear-con-file")
     public ResponseEntity<?> crearConFile(@Valid Archivo archivo, BindingResult result, @RequestParam MultipartFile documento) throws IOException {
@@ -131,5 +143,50 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
         Resource documento = new ByteArrayResource(a.get().getFile());
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documento);
+    }
+
+    @GetMapping("/enviar-archivo/{id}")
+    public ResponseEntity<?> enviarArchivo(@PathVariable Long id, @RequestBody Correos correos) throws IOException, MessagingException {
+
+        Optional<Archivo> a = service.findById(id);
+
+        if (a.isEmpty() || a.get().getFile() == null){
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource documento = new ByteArrayResource(a.get().getFile());
+
+
+        List<String> emails = correos.getCorreos();
+
+        String[] emailsToSend = new String[emails.size()];
+
+        for (int i = 0; i < emailsToSend.length; i++) {
+            emailsToSend[i] = emails.get(i);
+        }
+
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setFrom("ginoag7@gmail.com", "Mikasa Support");
+        helper.setTo(emailsToSend);
+        helper.addAttachment(a.get().getTipoArchivo().getNombre() + ".pdf", documento, "application/json");
+
+        String mensaje = "Envio pdf adjunto de archivo" + a.get().getTipoArchivo().getNombre();
+
+        String contenido = "<h1>Hola Usuario,</h1> " +
+                "<p>Le alcanzo el archivo solicitado</p>";
+
+        helper.setSubject(mensaje);
+        helper.setText(contenido, true);
+
+        mailSender.send(message);
+
+        for (String email: emails){
+            System.out.println(email);
+        }
+
+        return ResponseEntity.ok().body("Nada");
     }
 }
