@@ -183,10 +183,6 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
 
         mailSender.send(message);
 
-        for (String email: emails){
-            System.out.println(email);
-        }
-
         return ResponseEntity.ok().body("Nada");
     }
 }
