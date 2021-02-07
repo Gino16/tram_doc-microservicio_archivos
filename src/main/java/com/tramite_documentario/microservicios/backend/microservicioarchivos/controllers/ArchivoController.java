@@ -39,8 +39,6 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
     @Autowired
     private SolicitudFeignClient solicitudFeignClient;
 
-    @Autowired
-    private JavaMailSender mailSender;
 
     @PostMapping("/crear-con-file")
     public ResponseEntity<?> crearConFile(@Valid Archivo archivo, BindingResult result, @RequestParam MultipartFile documento) throws IOException {
@@ -158,31 +156,11 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
 
 
         List<String> emails = correos.getCorreos();
+        
+        this.service.sendFiles(emails, documento, a.get().getTipoArchivo().getNombre());
 
-        String[] emailsToSend = new String[emails.size()];
+        
 
-        for (int i = 0; i < emailsToSend.length; i++) {
-            emailsToSend[i] = emails.get(i);
-        }
-
-
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        helper.setFrom("ginoag7@gmail.com", "Mikasa Support");
-        helper.setTo(emailsToSend);
-        helper.addAttachment(a.get().getTipoArchivo().getNombre() + ".pdf", documento, "application/json");
-
-        String mensaje = "Envio pdf adjunto de archivo" + a.get().getTipoArchivo().getNombre();
-
-        String contenido = "<h1>Hola Usuario,</h1> " +
-                "<p>Le alcanzo el archivo solicitado</p>";
-
-        helper.setSubject(mensaje);
-        helper.setText(contenido, true);
-
-        mailSender.send(message);
-
-        return ResponseEntity.ok().body("Nada");
+        return ResponseEntity.ok().body("Archivos enviados a los correos solicitados");
     }
 }
