@@ -1,7 +1,5 @@
 package com.tramite_documentario.microservicios.backend.microservicioarchivos.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tramite_documentario.microservicio.backend.commonmicroservicios.controllers.CommonController;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Archivo;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Solicitud;
@@ -9,23 +7,18 @@ import com.tramite_documentario.microservicios.backend.microservicioarchivos.cli
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.models.entity.Correos;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.ArchivoService;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.TipoArchivoServiceImpl;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.validation.Valid;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -113,7 +106,7 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
     }
 
     @GetMapping("/solicitud/{id}")
-    public ResponseEntity<?> listarArchivosBySolicitud(@PathVariable Long id){
+    public ResponseEntity<?> listarArchivosBySolicitud(@PathVariable Long id) {
 
         List<Archivo> archivos = this.service.findAllByIdSolicitud(id);
 
@@ -121,20 +114,20 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
     }
 
     @GetMapping("/archivos-sin-solicitud")
-    public ResponseEntity<?> listarArchivosSinSolicitud(){
+    public ResponseEntity<?> listarArchivosSinSolicitud() {
         return ResponseEntity.ok(this.service.findAllByIdSolicitudIsNull());
     }
 
     @PostMapping("/guardar-todos")
-    public ResponseEntity<?> guardarTodo(@RequestBody List<Archivo> archivos){
+    public ResponseEntity<?> guardarTodo(@RequestBody List<Archivo> archivos) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.service.saveAll(archivos));
     }
 
-    @GetMapping("/ver-archivo/{id}")
-    public ResponseEntity<?> verArchivo(@PathVariable Long id){
+    @PostMapping("/ver-archivo/{id}")
+    public ResponseEntity<?> verArchivo(@PathVariable Long id) {
         Optional<Archivo> a = service.findById(id);
 
-        if (a.isEmpty() || a.get().getFile() == null){
+        if (a.isEmpty() || a.get().getFile() == null) {
             return ResponseEntity.notFound().build();
         }
 
@@ -143,12 +136,12 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documento);
     }
 
-    @GetMapping("/enviar-archivo/{id}")
+    @PostMapping("/enviar-archivo/{id}")
     public ResponseEntity<?> enviarArchivo(@PathVariable Long id, @RequestBody Correos correos) throws IOException, MessagingException {
 
         Optional<Archivo> a = service.findById(id);
 
-        if (a.isEmpty() || a.get().getFile() == null){
+        if (a.isEmpty() || a.get().getFile() == null) {
             return ResponseEntity.notFound().build();
         }
 
@@ -156,10 +149,9 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
 
 
         List<String> emails = correos.getCorreos();
-        
+
         this.service.sendFiles(emails, documento, a.get().getTipoArchivo().getNombre());
 
-        
 
         return ResponseEntity.ok().body("Archivos enviados a los correos solicitados");
     }
