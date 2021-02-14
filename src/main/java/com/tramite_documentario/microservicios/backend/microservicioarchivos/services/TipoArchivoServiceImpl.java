@@ -6,5 +6,5 @@ import com.tramite_documentario.microservicios.backend.microservicioarchivos.mod
 import org.springframework.stereotype.Service;
 
 @Service
-public class TipoArchivoServiceImpl extends CommonServiceImpl<TipoArchivo, TipoArchivoRepository> {
+public class TipoArchivoServiceImpl extends CommonServiceImpl<TipoArchivo, TipoArchivoRepository> implements TipoArchivoService{
 }

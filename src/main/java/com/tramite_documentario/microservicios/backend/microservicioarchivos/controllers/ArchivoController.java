@@ -3,10 +3,11 @@ package com.tramite_documentario.microservicios.backend.microservicioarchivos.co
 import com.tramite_documentario.microservicio.backend.commonmicroservicios.controllers.CommonController;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Archivo;
 import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.Solicitud;
+import com.tramite_documentario.microservicios.backend.commonarchivos.models.entity.TipoArchivo;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.clients.SolicitudFeignClient;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.models.entity.Correos;
 import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.ArchivoService;
-import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.TipoArchivoServiceImpl;
+import com.tramite_documentario.microservicios.backend.microservicioarchivos.services.TipoArchivoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -27,7 +28,7 @@ import java.util.Optional;
 public class ArchivoController extends CommonController<Archivo, ArchivoService> {
 
     @Autowired
-    private TipoArchivoServiceImpl tipoArchivoService;
+    private TipoArchivoService tipoArchivoService;
 
     @Autowired
     private SolicitudFeignClient solicitudFeignClient;
@@ -55,7 +56,9 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
                 return ResponseEntity.notFound().build();
             }
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.service.save(entity));
+        this.service.save(entity);
+        List<Archivo> archivos = this.service.findAllByIdSolicitudIsNull();
+        return ResponseEntity.status(HttpStatus.CREATED).body(archivos);
     }
 
     @PutMapping("/editar-con-file/{id}")
@@ -105,6 +108,16 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
         return ResponseEntity.ok().body(tipoArchivoService.findAll());
     }
 
+
+    @GetMapping("/tipoArchivos/{id}")
+    public ResponseEntity<?> verTipoArchivo(@PathVariable Long id) {
+        Optional<TipoArchivo> tA = tipoArchivoService.findById(id);
+        if (tA.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(tA.get());
+    }
+
     @GetMapping("/solicitud/{id}")
     public ResponseEntity<?> listarArchivosBySolicitud(@PathVariable Long id) {
 
@@ -123,7 +136,7 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
         return ResponseEntity.status(HttpStatus.CREATED).body(this.service.saveAll(archivos));
     }
 
-    @PostMapping("/ver-archivo/{id}")
+    @GetMapping("/ver-archivo/{id}")
     public ResponseEntity<?> verArchivo(@PathVariable Long id) {
         Optional<Archivo> a = service.findById(id);
 
@@ -154,5 +167,12 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
 
 
         return ResponseEntity.ok().body("Archivos enviados a los correos solicitados");
+    }
+
+    @Override
+    public ResponseEntity<?> eliminar(Long id) {
+        this.service.deleteById(id);
+        List<Archivo> archivos = this.service.findAllByIdSolicitudIsNull();
+        return ResponseEntity.ok(archivos);
     }
 }
