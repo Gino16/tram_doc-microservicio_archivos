@@ -54,10 +54,10 @@ public class ArchivoServiceImpl extends CommonServiceImpl<Archivo, ArchivoReposi
         helper.setTo(emailsToSend);
         helper.addAttachment(nombreArchivo + ".pdf", documento, "application/json");
 
-        String mensaje = "Envio pdf adjunto de archivo" + nombreArchivo;
+        String mensaje = "Por favor no responder: Envio de archivo" + nombreArchivo;
 
         String contenido = "<h1>Hola Usuario,</h1> " +
-                "<p>Le alcanzo el archivo solicitado</p>";
+                "<p>Se le alcanzo el archivo solicitado</p>";
 
         helper.setSubject(mensaje);
         helper.setText(contenido, true);
