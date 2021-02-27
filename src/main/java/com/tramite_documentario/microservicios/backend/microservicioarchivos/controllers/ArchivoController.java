@@ -21,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -56,9 +58,10 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
                 return ResponseEntity.notFound().build();
             }
         }
-        this.service.save(entity);
-        List<Archivo> archivos = this.service.findAllByIdSolicitudIsNull();
-        return ResponseEntity.status(HttpStatus.CREATED).body(archivos);
+        Archivo archivo = this.service.save(entity);
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", archivo.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(map);
     }
 
     @PutMapping("/editar-con-file/{id}")
@@ -170,9 +173,11 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
     }
 
     @Override
-    public ResponseEntity<?> eliminar(Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         this.service.deleteById(id);
-        List<Archivo> archivos = this.service.findAllByIdSolicitudIsNull();
-        return ResponseEntity.ok(archivos);
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        return ResponseEntity.ok(map);
     }
 }
