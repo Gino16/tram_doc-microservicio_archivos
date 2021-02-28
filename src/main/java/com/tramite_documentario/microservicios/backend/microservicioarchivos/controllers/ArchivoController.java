@@ -180,4 +180,26 @@ public class ArchivoController extends CommonController<Archivo, ArchivoService>
         map.put("id", id);
         return ResponseEntity.ok(map);
     }
+
+    @Override
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        List<Archivo> archivos = (List<Archivo>) this.service.findAll();
+        archivos.forEach(archivo -> {
+            archivo.setFile(null);
+        });
+        return ResponseEntity.ok(archivos);
+    }
+
+    @Override
+    @GetMapping("/{id}")
+    public ResponseEntity<?> ver(@PathVariable Long id) {
+        Optional<Archivo> a = this.service.findById(id);
+        if (a.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Archivo archivo = a.get();
+        archivo.setFile(null);
+        return ResponseEntity.ok(archivo);
+    }
 }
